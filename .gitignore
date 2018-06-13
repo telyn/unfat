@@ -1,0 +1,8 @@
+*.fat12
+*.fat16
+*.fat32
+!**/testdata/*.fat12
+!**/testdata/*.fat16
+!**/testdata/*.fat32
+
+*.xxd
