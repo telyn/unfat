@@ -62,12 +62,26 @@ func TestUcs2sgl(t *testing.T) {
 		expected []byte
 	}{{
 		in: "hello",
-		expected: []byte{'h', 0, 'e', 0, 'l', 0, 'l', 0, 'o', 0,
-			0, 0,
-			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
+		expected: []byte{'h', 0, 'e', 0, 'l', 0, 'l', 0,
+			'o', 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF,
+			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+			0xFF, 0xFF},
+	}, {
+		in: "1234567890abc",
+		expected: []byte{'1', 0, '2', 0, '3', 0, '4', 0,
+			'5', 0, '6', 0, '7', 0, '8', 0,
+			'9', 0, '0', 0, 'a', 0, 'b', 0, 'c', 0},
+	}, {
+		in: "1234567890ab",
+		expected: []byte{'1', 0, '2', 0, '3', 0, '4', 0,
+			'5', 0, '6', 0, '7', 0, '8', 0,
+			'9', 0, '0', 0, 'a', 0, 'b', 0, 0, 0},
 	}}
 	for _, test := range tests {
 		t.Run(test.in, func(t *testing.T) {
+			if len(test.expected) != 26 {
+				t.Errorf("expected has wrong length (%d), should be 26", test.expected)
+			}
 			res := ucs2sgl(test.in)
 			if !reflect.DeepEqual(test.expected, res) {
 				t.Errorf("expect: %x\nactual %x", test.expected, res)
