@@ -2,8 +2,6 @@
 package dir
 
 import (
-	"encoding/binary"
-	"fmt"
 	"time"
 )
 
@@ -44,12 +42,29 @@ func lfnChecksum(str string) byte {
 	return sum
 }
 
-// repeatedly call UnmarshalBinary with a 32-byte directory entry
-func (f *File) UnmarshalBinary(buf []byte) (err error) {
-	if len(buf) != 32 {
-		return fmt.Errorf("32-byte slice must be given, but was of length %d", len(buf))
+/*
+func (f *File) readLFN(buf []byte) (entriesRead int, err error) {
+	isFirst := buf[0] & 0x40
+	if !isFirst {
+		return
 	}
+	numEntries := buf[0] & 0x0F
+	if numEntries == 0 {
+		return
+	}
+	longName := make([]byte, numEntries*26)
+	idx := 0
 
+	for entry := numEntries; entry > 0; entry-- {
+		physicalEntry := numEntries - entry
+		bytes := buf[physicalEntry*32+0 : physicalEntry*32+32]
+
+	}
+	// find the first 0000, truncate
+	// convert from ucs2 to utf8
+}
+
+func (f *File) UnmarshalBinary(buf []byte) (err error) {
 	const oName = 0x00
 	const oAttributes = 0x0B
 	const oCreateTimeFine = 0x0D
@@ -84,11 +99,9 @@ func (f *File) UnmarshalBinary(buf []byte) (err error) {
 		if isFirst && f.LongName != "" {
 			return fmt.Errorf("Found multiple first LFN entries")
 		}
-
-		//idx := sequenceNum * 13
-
 	} else {
 
 	}
 	return
 }
+*/
