@@ -8,6 +8,7 @@ import (
 type LFNEntry struct {
 	SequenceNumber int
 	IsLast         bool
+	Checksum       byte
 	Chars          []byte
 }
 
