@@ -19,13 +19,17 @@ FAT32
 -----
 * [x] Correctly parse LFN entries
 * [x] Correctly parse a set of LFN entries
-* [ ] Correctly read long name file entries from a directory
 * [ ] Correctly parse file entries
 * [ ] Correctly read 8.3 file entries from a directory
-* [ ] Correctly read a file with LFN entries from a directory
+* [ ] Correctly read a directory
 * [ ] Given a mock cluster map & fat header, correctly read a file
 * [ ] Correctly read the root directory of an actual filesystem
 * [ ] Correctly read a file from an actual filesystem
+
+Tool
+----
+* [ ] list contents of a dir (`unfat -t -f blah.fat32 /path/to/dir`)
+* [ ] extract one or more files (`unfat -x -f blah.fat32 /path/to/file/or/dir`)
 
 Stretch goals
 -------------
