@@ -18,7 +18,7 @@ Progress
 FAT32
 -----
 * [x] Correctly parse LFN entries
-* [ ] Correctly parse a set of LFN entries
+* [x] Correctly parse a set of LFN entries
 * [ ] Correctly read long name file entries from a directory
 * [ ] Correctly parse file entries
 * [ ] Correctly read 8.3 file entries from a directory
