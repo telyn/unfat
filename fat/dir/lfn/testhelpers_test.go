@@ -10,7 +10,7 @@ import (
 )
 
 func helperLoadDirectoryEntries(t *testing.T) []byte {
-	bytes, err := ioutil.ReadFile("./testdata/directory-entries.fat32")
+	bytes, err := ioutil.ReadFile("../testdata/directory-entries.fat32")
 	if err != nil {
 		t.Fatalf("Couldn't load test data: %v", err)
 	}

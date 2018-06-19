@@ -3,46 +3,66 @@ package dir
 import (
 	"encoding/binary"
 	"fmt"
+	"unicode/utf16"
 )
 
-type LFNEntry struct {
-	SequenceNumber int
-	IsLast         bool
-	Checksum       byte
-	Chars          []byte
+type LongFileName struct {
+	Name     string
+	Checksum byte
 }
 
-func readLFNEntry(bytes []byte) (entry LFNEntry, err error) {
-	const oFirstChars = 0x01
-	const oAttributes = 0x0B
-	const oType = 0x0C
-	const oChecksum = 0x0D
-	const oSecondChars = 0x0E
-	const oFirstCluster = 0x1A
-	const oThirdChars = 0x1C
-	const oEnd = 0x20
+func (lfn LongFileName) Matches(eightThree []byte) bool {
+	return Checksum(eightThree) == lfn.Checksum
+}
 
-	if bytes[oAttributes] != 0xF {
-		return entry, fmt.Errorf("attributes were not 0xF, were %x", bytes[oAttributes])
+func ReadLongFileName(bytes []byte) (lfn LongFileName, numEntries int, err error) {
+	entry, err := readLFNEntry(bytes)
+	if err != nil {
+		return
 	}
-	if bytes[oType] != 0x00 {
-		return entry, fmt.Errorf("type was not 0x0, was %x", bytes[oType])
+	numEntries++
+	if !entry.IsLast {
+		err = fmt.Errorf("First LFN entry read was not final in its sequence. Bailing")
+		return
 	}
-	firstCluster := binary.LittleEndian.Uint16(bytes[oFirstCluster : oFirstCluster+2])
-	if firstCluster != 0 {
-		return entry, fmt.Errorf("first cluster was not 0, was %d", firstCluster)
+	lfn.Checksum = entry.Checksum
+	entries := make([]LFNEntry, entry.SequenceNumber)
+	entries[entry.SequenceNumber-1] = entry
+	for i := entry.SequenceNumber - 1; i > 0; i-- {
+		fmt.Printf("i: %d\n", i)
+		bytes = bytes[32:]
+		entry, err = readLFNEntry(bytes)
+		if err != nil {
+			return
+		}
+		if entry.IsLast {
+			err = fmt.Errorf("LFN entry never finishes before next entry begins")
+			return
+		}
+		numEntries++
+		if entry.Checksum != lfn.Checksum {
+			err = fmt.Errorf("Mismatched LFN entry checksum for sequence numbrer %d: %x (expecting %x)", i, entry.Checksum, lfn.Checksum)
+			return
+		}
+		entries[i-1] = entry
+	}
+	lfn.Name = parseEntries(entries)
+	return
+}
+
+func parseEntries(entries []LFNEntry) (name string) {
+	ints := make([]uint16, 0, 13*len(entries))
+	for i, entry := range entries {
+		fmt.Printf("%d: %s\n", i, string(entry.Chars))
+		for c := 0; c < 26; c += 2 {
+			char := binary.LittleEndian.Uint16(entry.Chars[c:])
+			if char == 0 {
+				break
+			}
+			ints = append(ints, char)
+		}
 	}
 
-	isLast := false
-	if (bytes[0] & 0x40) == 0x40 {
-		isLast = true
-	}
-
-	chars := make([]byte, 26)
-
-	copy(chars[0:10], bytes[oFirstChars:oAttributes])
-	copy(chars[10:22], bytes[oSecondChars:oFirstCluster])
-	copy(chars[22:26], bytes[oThirdChars:oEnd])
-
-	return LFNEntry{SequenceNumber: int(bytes[0] & 0xF), IsLast: isLast, Chars: chars}, nil
+	runes := utf16.Decode(ints)
+	return string(runes)
 }
