@@ -13,6 +13,15 @@ func TestChecksum(t *testing.T) {
 	}{{
 		in:       "TEST-DIR   ",
 		expected: 0x78,
+	}, {
+		in:       "TEST-D~1   ",
+		expected: 0xC7,
+	}, {
+		in:       "BIG-FILE   ",
+		expected: 0xD7,
+	}, {
+		in:       "YEAH-F~1GIF",
+		expected: 0xE2,
 	}}
 	for _, test := range tests {
 		t.Run(test.in, func(t *testing.T) {
