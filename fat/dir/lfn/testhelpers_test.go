@@ -2,7 +2,6 @@ package dir
 
 import (
 	"encoding/binary"
-	"fmt"
 	"io/ioutil"
 	"reflect"
 	"testing"
@@ -41,7 +40,6 @@ func ucs2sgl(name string) (bytes []byte) {
 	}
 	bytes = make([]byte, len(name)*2, 26)
 	ints := utf16.Encode([]rune(name))
-	fmt.Printf("ints: %#v", ints)
 	for i := range ints {
 		binary.LittleEndian.PutUint16(bytes[i*2:], ints[i])
 	}

@@ -29,7 +29,6 @@ func ReadLongFileName(bytes []byte) (lfn LongFileName, numEntries int, err error
 	entries := make([]LFNEntry, entry.SequenceNumber)
 	entries[entry.SequenceNumber-1] = entry
 	for i := entry.SequenceNumber - 1; i > 0; i-- {
-		fmt.Printf("i: %d\n", i)
 		bytes = bytes[32:]
 		entry, err = readLFNEntry(bytes)
 		if err != nil {
@@ -52,8 +51,7 @@ func ReadLongFileName(bytes []byte) (lfn LongFileName, numEntries int, err error
 
 func parseEntries(entries []LFNEntry) (name string) {
 	ints := make([]uint16, 0, 13*len(entries))
-	for i, entry := range entries {
-		fmt.Printf("%d: %s\n", i, string(entry.Chars))
+	for _, entry := range entries {
 		for c := 0; c < 26; c += 2 {
 			char := binary.LittleEndian.Uint16(entry.Chars[c:])
 			if char == 0 {
