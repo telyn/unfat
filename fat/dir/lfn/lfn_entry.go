@@ -2,7 +2,6 @@ package dir
 
 import (
 	"encoding/binary"
-	"fmt"
 )
 
 type LFNEntry struct {
@@ -23,14 +22,20 @@ func readLFNEntry(bytes []byte) (entry LFNEntry, err error) {
 	const oEnd = 0x20
 
 	if bytes[oAttributes] != 0xF {
-		return entry, fmt.Errorf("attributes were not 0xF, were %x", bytes[oAttributes])
+		return entry, NotLFNEntry{Message: "attributes were not 0xF",
+			Attributes: bytes[oAttributes]}
 	}
 	if bytes[oType] != 0x00 {
-		return entry, fmt.Errorf("type was not 0x0, was %x", bytes[oType])
+		return entry, NotLFNEntry{Message: "type was not 0x0",
+			Attributes: bytes[oAttributes], Type: bytes[oType]}
 	}
-	firstCluster := binary.LittleEndian.Uint16(bytes[oFirstCluster : oFirstCluster+2])
+	firstCluster := binary.LittleEndian.Uint16(
+		bytes[oFirstCluster : oFirstCluster+2])
+
 	if firstCluster != 0 {
-		return entry, fmt.Errorf("first cluster was not 0, was %d", firstCluster)
+		return entry, NotLFNEntry{Message: "first cluster was not 0",
+			Attributes: bytes[oAttributes], Type: bytes[oType],
+			FirstCluster: firstCluster}
 	}
 	checksum := bytes[oChecksum]
 
