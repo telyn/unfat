@@ -26,7 +26,22 @@ func padShortName(str string) string {
 	return strings.ToUpper(name + spaces + ext)
 }
 
-func unpadShortName(string) string {
+func unpadShortName(bytes []byte) string {
+	if len(bytes) != 11 {
+		return "☠️ "
+	}
+	name := make([]rune, 0, 8)
+	ext := make([]rune, 0, 3)
+	for i, b := range bytes {
+		c := charmap.CodePage437.DecodeByte(b)
+		if i < 8 {
+			name = append(name, c)
+		} else {
+			ext = append(ext, c)
+		}
+	}
+	strName = strings.TrimRight(string(name), " ")
+	strExt = strings.TrimRight(string(ext), " ")
 
-	return ""
+	return strName + "." + strExt
 }

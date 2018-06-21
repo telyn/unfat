@@ -1,70 +1,43 @@
-// dir implements support for FAT32 directory entries (including i haven
+// Package dir implements support for FAT32 directory entries
 package dir
 
 import (
+	"encoding/binary"
 	"time"
 )
-
-const FileAttrRO = 0x01
-const FileAttrHidden = 0x02
-const FileAttrSystem = 0x04
-const FileAttrVolumeLabel = 0x08
-const FileAttrSubdirectory = 0x10
-const FileAttrArchive = 0x20
-const FileAttrDevice = 0x40
 
 const fileAttrLFN = 0x0F
 
 type File struct {
-	ShortName    string
-	LongName     string
-	Attributes   uint8
+	Name         string
+	Attributes   [2]byte
 	CreationTime time.Time
 	AccessTime   time.Time
 	ModifiedTime time.Time
 	FirstCluster uint32
 	Size         uint32
-
-	shortNameChecksum uint16
-	longNameBuf       []string
+	LFN          lfn.LongFileName
 }
 
-func lfnChecksum(str string) byte {
-	sn := []byte(padShortName(str))
-
-	sum := byte(0)
-
-	for i := 11; i != 0; i-- {
-		sum = ((sum & 1) << 7) +
-			(sum >> 1) + sn[i]
-
-	}
-	return sum
-}
-
-/*
-func (f *File) readLFN(buf []byte) (entriesRead int, err error) {
-	isFirst := buf[0] & 0x40
-	if !isFirst {
+// ReadDirectoryEntry attempts to read a full directory entry starting at the
+// beginning of buf, including a Long File Name if there is one.
+// If an LFN with no matching directory entry is found, returns a File
+// representing the long name and an error.
+// numEntries is always guaranteed to be the number of entries used during the
+// read, regardless of any error conditions. In other words - these two calls
+// will always read separate files:
+// f1, n, err := ReadDirectoryEntry(buf)
+// f2, n, err := ReadDirectoryEntry(buf[32*n:])
+func ReadDirectoryEntry(buf []byte) (f File, numEntries int, err error) {
+	// first try to read an LFN
+	lfn, numEntries, err := lfn.ReadLongFileName(buf)
+	f.LFN = lfn
+	if err != nil {
 		return
 	}
-	numEntries := buf[0] & 0x0F
-	if numEntries == 0 {
-		return
-	}
-	longName := make([]byte, numEntries*26)
-	idx := 0
 
-	for entry := numEntries; entry > 0; entry-- {
-		physicalEntry := numEntries - entry
-		bytes := buf[physicalEntry*32+0 : physicalEntry*32+32]
+	buf = buf[numEntries*32:]
 
-	}
-	// find the first 0000, truncate
-	// convert from ucs2 to utf8
-}
-
-func (f *File) UnmarshalBinary(buf []byte) (err error) {
 	const oName = 0x00
 	const oAttributes = 0x0B
 	const oCreateTimeFine = 0x0D
@@ -77,31 +50,9 @@ func (f *File) UnmarshalBinary(buf []byte) (err error) {
 	const oFirstClusterLow = 0x1A
 	const oSize = 0x1C
 
-	const oLFNSequenceNumber = 0x00
-	const oLFNChars1 = 0x01
-	const oLFNShortNameChecksum = 0x0D
-	const oLFNChars2 = 0x0E
-	const oLFNChars3 = 0x1C
-
-	f.Attributes = buf[oAttributes]
-	f.FirstCluster = uint32(buf[oFirstClusterLow]) << 8
+	f.Name = unpadShortName(buf[oName : oName+11])
+	f.Attributes = ReadAttributes(buf[oAttributes : oAttributes+2])
+	// fuck about with time???
+	f.FirstCluster = uint32(buf[oFirstClusterLow])<<8 | oFirstClusterHigh
 	f.Size = binary.LittleEndian.Uint32(buf[oSize : oSize+3])
-	shortNameChecksum := binary.LittleEndian.Uint16(buf[oLFNShortNameChecksum : oLFNShortNameChecksum+1])
-
-	if f.Attributes == fileAttrLFN && f.Size != 0 && f.FirstCluster == 0 {
-		// almost certainly a LFN
-		if f.shortNameChecksum != 0 && f.shortNameChecksum != shortNameChecksum {
-			return fmt.Errorf("LFN checksum disagreed: expected %x, got %x", f.shortNameChecksum, shortNameChecksum)
-		}
-
-		isFirst := (buf[oLFNSequenceNumber] & 0x20) != 0
-		//sequenceNum := buf[oLFNSequenceNumber] & 0xF
-		if isFirst && f.LongName != "" {
-			return fmt.Errorf("Found multiple first LFN entries")
-		}
-	} else {
-
-	}
-	return
 }
-*/
