@@ -88,6 +88,7 @@ func TestReadLFNEntry(t *testing.T) {
 				'g', 0,
 			},
 		},
+		// TODO: add tests for error conditions (see lfn_test)
 	}}
 	for _, test := range tests {
 		bytes := helperLoadDirectoryEntries(t)
