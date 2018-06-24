@@ -1,4 +1,4 @@
-package dir_test
+package lfn_test
 
 import (
 	"testing"

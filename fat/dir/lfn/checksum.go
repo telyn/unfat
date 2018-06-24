@@ -1,4 +1,4 @@
-package dir
+package lfn
 
 // Checksum returns the checksum for an 8.3 name
 func Checksum(eightThree []byte) (sum byte) {
