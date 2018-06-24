@@ -1,4 +1,4 @@
-package dir
+package attrs
 
 const AttrRO = 0x01
 const AttrHidden = 0x02
@@ -20,7 +20,7 @@ type Attributes struct {
 	Reserved     bool
 }
 
-func ReadAttributes(b1 byte, b2) (a Attributes) {
+func ReadAttributes(b1, b2 byte) (a Attributes) {
 	if b1&AttrRO == AttrRO {
 		a.ReadOnly = true
 	}
@@ -45,4 +45,5 @@ func ReadAttributes(b1 byte, b2) (a Attributes) {
 	if b1&AttrReserved == AttrReserved {
 		a.Reserved = true
 	}
+	return
 }

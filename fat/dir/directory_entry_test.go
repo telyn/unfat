@@ -44,7 +44,7 @@ func TestDirectoryEntry(t *testing.T) {
 				//data := data[offset : offset+32]
 				//f.UnmarshalBinary(data)
 			}
-			if f.ShortName != test.shortname {
+			if f.Name != test.shortname {
 				//t.Errorf("ShortName expected to be %q but was %q", test.shortname, f.ShortName)
 			}
 		})

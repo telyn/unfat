@@ -1,6 +1,10 @@
 package dir
 
-import "strings"
+import (
+	"strings"
+
+	"golang.org/x/text/encoding/charmap"
+)
 
 func padShortName(str string) string {
 	if len(str) > 12 {
@@ -40,8 +44,8 @@ func unpadShortName(bytes []byte) string {
 			ext = append(ext, c)
 		}
 	}
-	strName = strings.TrimRight(string(name), " ")
-	strExt = strings.TrimRight(string(ext), " ")
+	strName := strings.TrimRight(string(name), " ")
+	strExt := strings.TrimRight(string(ext), " ")
 
 	return strName + "." + strExt
 }

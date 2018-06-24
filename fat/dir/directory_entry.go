@@ -4,13 +4,16 @@ package dir
 import (
 	"encoding/binary"
 	"time"
+
+	"github.com/telyn/unfat/fat/dir/attrs"
+	"github.com/telyn/unfat/fat/dir/lfn"
 )
 
 const fileAttrLFN = 0x0F
 
 type File struct {
 	Name         string
-	Attributes   [2]byte
+	Attributes   attrs.Attributes
 	CreationTime time.Time
 	AccessTime   time.Time
 	ModifiedTime time.Time
@@ -51,8 +54,9 @@ func ReadDirectoryEntry(buf []byte) (f File, numEntries int, err error) {
 	const oSize = 0x1C
 
 	f.Name = unpadShortName(buf[oName : oName+11])
-	f.Attributes = ReadAttributes(buf[oAttributes : oAttributes+2])
+	f.Attributes = attrs.ReadAttributes(buf[oAttributes], buf[oAttributes+1])
 	// fuck about with time???
 	f.FirstCluster = uint32(buf[oFirstClusterLow])<<8 | oFirstClusterHigh
 	f.Size = binary.LittleEndian.Uint32(buf[oSize : oSize+3])
+	return
 }
