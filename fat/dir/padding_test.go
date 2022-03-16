@@ -32,16 +32,22 @@ func TestUnpadShortName(t *testing.T) {
 		out string
 	}{{
 		in:  "HI      WAV",
-		out: "hi.wav",
+		out: "HI.WAV",
 	}, {
 		in:  "GODWHACKGIF",
-		out: "godwhack.gif",
+		out: "GODWHACK.GIF",
+	}, {
+		in:  "TESTNAME   ",
+		out: "TESTNAME",
+	}, {
+		in:  "TEST-DIR   ",
+		out: "TEST-DIR",
 	}}
 	for _, test := range tests {
 		t.Run(test.in, func(t *testing.T) {
-			res := padShortName(test.in)
+			res := unpadShortName([]byte(test.in))
 			if res != test.out {
-				//			t.Error(res)
+				t.Errorf("expected %q, got %q", test.out, res)
 			}
 		})
 	}

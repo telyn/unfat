@@ -3,6 +3,7 @@ package dir
 
 import (
 	"encoding/binary"
+	"fmt"
 	"time"
 
 	"github.com/telyn/unfat/fat/dir/attrs"
@@ -12,8 +13,9 @@ import (
 const fileAttrLFN = 0x0F
 
 type File struct {
-	Name         string
-	Attributes   attrs.Attributes
+	Name       string
+	Attributes attrs.Attributes
+	// I haven't even started to work out the times.
 	CreationTime time.Time
 	AccessTime   time.Time
 	ModifiedTime time.Time
@@ -40,6 +42,11 @@ func ReadDirectoryEntry(buf []byte) (f File, numEntries int, err error) {
 	}
 
 	buf = buf[numEntries*32:]
+	if len(buf) < 32 {
+		err = fmt.Errorf("buf should be a multiple of 32 bytes long, but the last piece is %d bytes", buf)
+		return
+	}
+	numEntries++
 
 	const oName = 0x00
 	const oAttributes = 0x0B
@@ -55,8 +62,8 @@ func ReadDirectoryEntry(buf []byte) (f File, numEntries int, err error) {
 
 	f.Name = unpadShortName(buf[oName : oName+11])
 	f.Attributes = attrs.ReadAttributes(buf[oAttributes], buf[oAttributes+1])
-	// fuck about with time???
+	// TODO: fuck about with time???
 	f.FirstCluster = uint32(buf[oFirstClusterLow])<<8 | oFirstClusterHigh
-	f.Size = binary.LittleEndian.Uint32(buf[oSize : oSize+3])
+	f.Size = binary.LittleEndian.Uint32(buf[oSize : oSize+4])
 	return
 }

@@ -46,6 +46,9 @@ func unpadShortName(bytes []byte) string {
 	}
 	strName := strings.TrimRight(string(name), " ")
 	strExt := strings.TrimRight(string(ext), " ")
+	if len(strExt) == 0 {
+		return strName
+	}
 
 	return strName + "." + strExt
 }

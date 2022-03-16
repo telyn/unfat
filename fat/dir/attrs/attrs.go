@@ -1,5 +1,7 @@
 package attrs
 
+import "strings"
+
 const AttrRO = 0x01
 const AttrHidden = 0x02
 const AttrSystem = 0x04
@@ -46,4 +48,33 @@ func ReadAttributes(b1, b2 byte) (a Attributes) {
 		a.Reserved = true
 	}
 	return
+}
+
+func (a Attributes) String() string {
+	attrs := make([]string, 0, 160)
+	if a.ReadOnly {
+		attrs = append(attrs, "ReadOnly")
+	}
+	if a.Hidden {
+		attrs = append(attrs, "Hidden")
+	}
+	if a.System {
+		attrs = append(attrs, "System")
+	}
+	if a.VolumeLabel {
+		attrs = append(attrs, "VolumeLabel")
+	}
+	if a.Subdirectory {
+		attrs = append(attrs, "Subdirectory")
+	}
+	if a.Archive {
+		attrs = append(attrs, "Archive")
+	}
+	if a.Device {
+		attrs = append(attrs, "Device")
+	}
+	if a.Reserved {
+		attrs = append(attrs, "Reserved")
+	}
+	return strings.Join(attrs, ", ")
 }

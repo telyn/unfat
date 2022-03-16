@@ -38,6 +38,9 @@ func (lfn LongFileName) Matches(eightThree []byte) bool {
 func ReadLongFileName(bytes []byte) (lfn LongFileName, numEntries int, err error) {
 	entry, err := readLFNEntry(bytes)
 	if err != nil {
+		if _, ok := err.(NotLFNEntry); ok {
+			err = nil
+		}
 		return
 	}
 	numEntries++
